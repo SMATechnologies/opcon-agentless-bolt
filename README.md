@@ -1,5 +1,5 @@
-# Project Name
-Project description
+# OpCon Agent-less via Bolt
+Provides a Job subtype to drive agentless workload on remote Windows and Linux systems.
 
 # Disclaimer
 No Support and No Warranty are provided by SMA Technologies for this project and related material. The use of this project's files is on your own risk.
