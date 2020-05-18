@@ -1,0 +1,11 @@
+connector/target/
+connector/log/
+connector/.classpath
+connector/.project
+connector/.settings
+connector/dependency-reduced-pom.xml
+emplugins/com.sma.ui.core.jobdetails.commvault/bin
+emplugins/com.sma.ui.core.jobdetails.commvault/.classpath
+emplugins/com.sma.ui.core.jobdetails.commvault/.project
+emplugins/com.sma.ui.core.jobdetails.commvault/.settings
+
