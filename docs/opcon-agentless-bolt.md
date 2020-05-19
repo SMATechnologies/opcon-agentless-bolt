@@ -14,7 +14,7 @@ The Agentless (Bolt) subtype supports task definitions for Bolt and submits the 
 
 # Installation
 
-Download and install the Bolt software as directed on either a Windows or Linux server.
+Download and install the Bolt software as directed on either a Windows or Linux server (https://puppet.com/docs/bolt/latest/bolt_installing.html).
 
 Download the **Agentless(Bolt)** Job Sub-type, stop Enterprise Manager, copy the .jar file into the drop-ins directory and restart Enterprise Manager.
 
@@ -128,4 +128,74 @@ example **task run** (can be seen by switching Job Sub-type to <None>)
 file upload 'C:\Software\LSAM_19.0.7_Ubuntu14.04_64.tar' '/usr/local/lsam_19.0.7/LSAM_19.0.7_Ubuntu14.04_64.tar' --targets LINUX001,LINUX002 --no-host-key-check --user opcon --password (##HIDDEN##)
 file upload 'C:\Software\SMA OpCon Windows LSAM install.msi' 'C:\Software\SMA OpCon Windows LSAM install.msi' --targets winrm://WINDOWS1,winrm://WINDOWS2 --no-ssl --user opcon --password (##HIDDEN##)
 
+```
+## Working with Bolt
+
+Bolt tasks are similar to scripts, but they are kept in modules and can have metadata. 
+You can write tasks in any programming language the targets run, such as Bash, PowerShell, or Python. A task can even be a compiled binary that runs on the target. Place your task in the ./tasks directory of a module and add a metadata file to describe parameters and configure task behavior.
+
+For a task to run on remote *nix systems, it must include a shebang (#!) line at the top of the file to specify the interpreter.
+
+You use a task name to interact with a task from the Bolt command line. For example, you can use bolt task run smaopconagents::unixagentcmd --targets localhost to run the smaopconagents::unixagentcmd task.
+
+Task names are composed of one or two name segments, indicating:
+
+    The name of the module where the task is located.
+
+    The name of the task file, without the extension.
+
+After creating your module, you will need to regitsre it with Bolt by running the bolt puppetfile command.
+Add your module to the Puppetfile associated with your installation.
+
+```
+
+mod 'smaopconagents', local:true
+
+```
+	
+###Some useful Bolt commands
+
+command                    | Description
+-----------------          | -----------
+bolt task show             | displays a list of Bolt tasks available on your system
+bolt task show <task-name> | displays the metadata associated with the task
+bolt --help                | displays bolt help 
+bolt --help <subcommand>   | displays bolt help about a specific command
+bolt puppetfile install    | installs modules from a Puppetfile into a boltdir (required to register bolts tasks)
+ 
+###Task
+
+The following task **unixagentcmd** is used to perform operations on SMA OpCon Linux agents.
+It requires 2 arguments port and command. The format for passing an argument to a Linux script is to prefix the argument with **$PT_** 
+
+```
+	
+#!/bin/bash
+cd /usr/local/lsam/bin
+./lsam$PT_port $PT_command 
+
+
+```
+###Task metadata
+
+Task metadata files describe task parameters, validate input, and control how Bolt executes the task.
+
+For example, the module **smaopconagents** includes the **smaopconagents::unixagentcmd** task with the metadata file, **unixagentcmd.json**.
+The **input_method** of the metadata defines how parameters are passed to the task (environment, stdin, powershell).
+
+```
+{
+  "description":"Executes Unix Agent commands",
+  "parameters":{
+    "port":{
+      "description":"the port number of the agent to execute",
+      "type":"String"
+      },
+	"command":{
+      "description":"the command to execute",
+      "type":"Enum[start, stop, status]"
+	  }
+  },
+  "input_method":"environment"
+}  
 ```
