@@ -14,18 +14,19 @@ The Agentless (Bolt) subtype supports task definitions for Bolt and submits the 
 
 # Installation
 
-Download and install the Bolt software as directed on either a Windows or Linux server (https://puppet.com/docs/bolt/latest/bolt_installing.html).
+Download and install the Bolt software as directed on either a Windows or *nix server (https://puppet.com/docs/bolt/latest/bolt_installing.html).
 
 Download the **Agentless(Bolt)** Job Sub-type, stop Enterprise Manager, copy the .jar file into the drop-ins directory and restart Enterprise Manager.
 
 The Job Sub-type should be visible when selecting Windows or Unix job types. If this is not visible, restart the Enterprise Manager using 'Run as Administrator' for the initial time.
 
-Create a global property **BOLT_PATH** that contains the full path of the BOLT binary installation directory.
+Create a global property **BOLT_PATH** that contains the full path of the Windows BOLT binary installation directory.
+Create a global property **BOLT_UPATH** that contains the full path of the Linux BOLT binary installation directory.
 
 # Instructions
 
 ## Supported Tasks
-The opconcli program provides the following tasks:
+The Agentless (Bolt) Job Sub-Type provides the following tasks:
 
 - **command run**: execute a command on a remote Windows or Linux system.
 - **script run**: execute a script on a remote Windows or Linux system. The script is downloaded to the remote system, executed and removed.
@@ -34,7 +35,7 @@ The opconcli program provides the following tasks:
 
 ## Using the Agentless (Bolt) Job Sub-type
 
-When using the Agentless Sub-Type select the required task from the Bolt Task drop-down list. Complete the definitions. Once a task is saved, Bolt Task cannot be changed.
+When using the Agentless (Bolt) Sub-Type select the required task from the Bolt Task drop-down list. Complete the definitions. Once a task is saved, Bolt Task cannot be changed.
 
 ### Remote Command
 **Remote Command** is used to execute commands remotely on either a Windows or Linux system.
@@ -78,7 +79,8 @@ Argument          | Are arguments that are passed to the script.
 
 example **script run** (can be seen by switching Job Sub-type to <None>)
 ```
-task run 'C:\TestData\scripts\display.sh' '5 10' --targets LINUX002 --no-host-key-check --user opcon --password (##HIDDEN##) 
+script run 'C:\TestData\scripts\display.sh' '5 10' --targets LINUX002 --no-host-key-check --user opcon --password (##HIDDEN##) 
+script run c:\testdata\scripts\CheckWindowsServices.ps1 --targets winrm://10.1.0.6 --user smaadmin --password (##HIDDEN##) --no-ssl
 
 ```
 
@@ -163,7 +165,7 @@ bolt --help                | displays bolt help
 bolt --help <subcommand>   | displays bolt help about a specific command
 bolt puppetfile install    | installs modules from a Puppetfile into a boltdir (required to register bolts tasks)
  
-###Task
+###Task example
 
 The following task **unixagentcmd** is used to perform operations on SMA OpCon Linux agents.
 It requires 2 arguments port and command. The format for passing an argument to a Linux script is to prefix the argument with **$PT_** 
@@ -176,7 +178,7 @@ cd /usr/local/lsam/bin
 
 
 ```
-###Task metadata
+###Task metadata example
 
 Task metadata files describe task parameters, validate input, and control how Bolt executes the task.
 
