@@ -14,18 +14,15 @@ import com.sma.core.api.KeyValueData;
 import com.sma.core.api.constants.SystemConstants;
 import com.sma.core.api.interfaces.IPersistentJob;
 import com.sma.core.session.ContextID;
-import com.sma.ui.core.editors.widgets.EditingControlTokenSelectorListener;
 import com.sma.ui.core.jobdetails.JobDetailsHelper;
 import com.sma.ui.core.jobdetails.JobUtil;
 import com.sma.ui.core.jobdetails.connectors.agentlessbolt.enums.AgentlessBoltEnums;
 import com.sma.ui.core.jobdetails.connectors.agentlessbolt.modules.AgentlessBoltData;
 import com.sma.ui.core.messages.IMessageDisplayer;
-import com.sma.ui.core.widgets.listeners.CapitalizerVerifyListener;
 import com.sma.ui.core.widgets.listeners.ControlTokenSelectorListener;
 import com.sma.ui.core.widgets.listeners.DirtyModifyAdapter;
 import com.sma.ui.core.widgets.listeners.DirtySelectionAdapter;
 import com.sma.ui.core.widgets.listeners.IDirtyListener;
-import com.sma.ui.core.widgets.viewers.IKeyValueTableValidator;
 import com.sma.ui.core.widgets.viewers.KeyValueTableWidget;
 
 public class RunTaskJobDetailsAction implements IJobDetailsAction {
@@ -142,8 +139,8 @@ public class RunTaskJobDetailsAction implements IJobDetailsAction {
 		_taskArgumentsKeyValueTable = new KeyValueTableWidget(_argComposite, SWT.NONE, ARGUMENTS_NAME, ARGUMENTS_VALUE, 20);
 		_taskArgumentsKeyValueTable.setToolTipText(ARGUMENTS_TOOLTIP);
 
-		Text keyText = _taskArgumentsKeyValueTable.getKeyText();
-		Text valueText = _taskArgumentsKeyValueTable.getValueText();
+//		Text keyText = _taskArgumentsKeyValueTable.getKeyText();
+//		Text valueText = _taskArgumentsKeyValueTable.getValueText();
 
 //		new EditingControlTokenSelectorListener(valueText, _contextID);
 //		keyText.addVerifyListener(new CapitalizerVerifyListener());

@@ -1,7 +1,9 @@
 package com.sma.ui.core.jobdetails.connectors.agentlessbolt;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.cli.ParseException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,6 +29,7 @@ import com.sma.core.api.job.specific.UnixJobProperties;
 import com.sma.core.session.ContextID;
 import com.sma.core.util.Util;
 import com.sma.ui.core.jobdetails.JobUtil;
+import com.sma.ui.core.jobdetails.connectors.agentlessbolt.AgentlessBoltConstants.CommandLineArguments;
 import com.sma.ui.core.jobdetails.connectors.agentlessbolt.enums.AgentlessBoltEnums;
 import com.sma.ui.core.jobdetails.connectors.agentlessbolt.modules.AgentlessBoltData;
 import com.sma.ui.core.messages.IMessageDisplayer;
@@ -42,10 +45,10 @@ import com.sma.ui.core.widgets.validation.ValidationMessage;
 
 public class AgentlessBoltUnixJobDetailsWidget extends AbstractAgentlessBoltUnixSubJobDetailsWidget {
 
-	private static final String COMMAND_SUFFIX = SystemConstants.BACK_SLASH
-			+ "bolt.bat"; //$NON-NLS-1$
+	private static final String COMMAND_SUFFIX = SystemConstants.SLASH
+			+ "bolt"; //$NON-NLS-1$
 
-	private static final String LOCATION_PROPERTY_NAME = "[[BOLT_PATH]]";
+	private static final String LOCATION_PROPERTY_NAME = "[[BOLT_UPATH]]";
 	private static final String LOCPATH_NAME = "Location";
 	private static final String LOCPATH_TOOLTIP = "The name of a global property that contains the location of the Bolt software";
 	private static final String TASK_NAME = "Bolt Task";
@@ -182,6 +185,10 @@ public class AgentlessBoltUnixJobDetailsWidget extends AbstractAgentlessBoltUnix
 					loadTaskActionWidget(new RunScriptJobDetailsAction(getInput(), getContextID(), getMessageDisplayer()));
 					break;
 
+				case task:
+					loadTaskActionWidget(new RunTaskJobDetailsAction(getInput(), getContextID(), getMessageDisplayer()));
+					break;
+
 				case upload:
 					loadTaskActionWidget(new RunFileUploadJobDetailsAction(getInput(), getContextID(), getMessageDisplayer()));
 					break;
@@ -302,6 +309,23 @@ public class AgentlessBoltUnixJobDetailsWidget extends AbstractAgentlessBoltUnix
 			break;
 		
 		case task:
+			// add task information
+			builder.append(SystemConstants.SPACE);
+			builder.append(AgentlessBoltConstants.CommandLineArguments.TaskRun);
+			builder.append(SystemConstants.SPACE);
+			builder.append(SystemConstants.QUOTE_SINGLE);
+			builder.append(data.getTask());
+			builder.append(SystemConstants.QUOTE_SINGLE);
+			if(!data.getTaskArguments().isEmpty()) {
+				for(String argument : data.getTaskArguments()) {
+					builder.append(SystemConstants.SPACE);
+					builder.append(SystemConstants.QUOTE_SINGLE);
+					builder.append(argument);
+					builder.append(SystemConstants.QUOTE_SINGLE);
+				}
+			} else {
+				builder.append(SystemConstants.SPACE);
+			}
 			break;
 
 		case upload:
@@ -356,6 +380,20 @@ public class AgentlessBoltUnixJobDetailsWidget extends AbstractAgentlessBoltUnix
 		builder.append(AgentlessBoltConstants.CommandLineArguments.PasswordArgument);
 		builder.append(SystemConstants.SPACE);
 		builder.append(data.getPassword());
+		if(data.getRunAs() != null) {
+			// add runas
+			builder.append(SystemConstants.SPACE);
+			builder.append(AgentlessBoltConstants.CommandLineArguments.RunAsArgument);
+			builder.append(SystemConstants.SPACE);
+			builder.append(data.getRunAs());
+		}
+		if(data.getSudoPassword() != null) {
+			// add sudopassword
+			builder.append(SystemConstants.SPACE);
+			builder.append(AgentlessBoltConstants.CommandLineArguments.SudoPasswordArgument);
+			builder.append(SystemConstants.SPACE);
+			builder.append(data.getSudoPassword());
+		}
 		return builder.toString();
 	}
 
@@ -401,8 +439,9 @@ public class AgentlessBoltUnixJobDetailsWidget extends AbstractAgentlessBoltUnix
 		_agentlessBoltData = new AgentlessBoltData();
 		int location = -1;
 
+		System.out.println("startimagea (" + startImage + ")");
 		// extract the location property from the commandline and display this is the 
-		int endProperty = startImage.indexOf(SystemConstants.BACK_SLASH);
+		int endProperty = startImage.indexOf(SystemConstants.SLASH);
 		if(endProperty > -1) {
 			_locPathText.setText(startImage.substring(1, endProperty));
 		}
@@ -413,6 +452,19 @@ public class AgentlessBoltUnixJobDetailsWidget extends AbstractAgentlessBoltUnix
 		// remove executable stuff
 		location = startImage.indexOf(COMMAND_SUFFIX);
 		startImage = startImage.substring(location + COMMAND_SUFFIX.length() + 2, startImage.length()).trim();
+		// parse from the end
+		if(startImage.contains(CommandLineArguments.SudoPasswordArgument)) {
+			location = startImage.indexOf(AgentlessBoltConstants.CommandLineArguments.SudoPasswordArgument);
+			String sudoPassword = startImage.substring(location, startImage.length()).trim();
+			_agentlessBoltData.setSudoPassword(sudoPassword.replace(AgentlessBoltConstants.CommandLineArguments.SudoPasswordArgument, SystemConstants.EMPTY_STRING).trim());
+			startImage = startImage.substring(0, location).trim();
+		}
+		if(startImage.contains(CommandLineArguments.RunAsArgument)) {
+			location = startImage.indexOf(AgentlessBoltConstants.CommandLineArguments.RunAsArgument);
+			String runAs = startImage.substring(location, startImage.length()).trim();
+			_agentlessBoltData.setRunAs(runAs.replace(AgentlessBoltConstants.CommandLineArguments.RunAsArgument, SystemConstants.EMPTY_STRING).trim());
+			startImage = startImage.substring(0, location).trim();
+		}
 		// parse from the end
 		location = startImage.indexOf(AgentlessBoltConstants.CommandLineArguments.PasswordArgument);
 		String password = startImage.substring(location, startImage.length()).trim();
@@ -474,7 +526,21 @@ public class AgentlessBoltUnixJobDetailsWidget extends AbstractAgentlessBoltUnix
 			_agentlessBoltData.setBoltTask(AgentlessBoltEnums.Task.script);
 			_taskItemCombo.setSelection(AgentlessBoltEnums.Task.script, true);
 			_taskItemCombo.setEnabled(false);
-
+		} else if(startImage.contains(AgentlessBoltConstants.CommandLineArguments.TaskRun)) {
+			// extract task run data
+			startImage = startImage.replace(AgentlessBoltConstants.CommandLineArguments.TaskRun, SystemConstants.EMPTY_STRING).trim();
+			String[] arguments = tokenizeParameters(startImage, false, "' '");
+			_agentlessBoltData.setTask(arguments[0].replace(SystemConstants.QUOTE_SINGLE, SystemConstants.EMPTY_STRING));
+			if(arguments.length > 1) {
+				List<String> taskArguments = new ArrayList<String>();
+				for(String argument : arguments) {
+					taskArguments.add(argument.replace(SystemConstants.QUOTE_SINGLE, SystemConstants.EMPTY_STRING));
+				}
+				_agentlessBoltData.setTaskArguments(taskArguments);
+			}
+			_agentlessBoltData.setBoltTask(AgentlessBoltEnums.Task.task);
+			_taskItemCombo.setSelection(AgentlessBoltEnums.Task.task, true);
+			_taskItemCombo.setEnabled(false);
 		}
 		return _agentlessBoltData;
 	}
