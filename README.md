@@ -1,5 +1,5 @@
 # OpCon Agent-less via Bolt
-Provides a Job subtype to drive agentless workload on remote Windows and Linux systems using Bolt.
+Provides a Job subtype to drive agentless workload on remote Windows and Linux systems using [Puppet Bolt](https://puppet.com/open-source/bolt/).
 
 Bolt is an open source orchestration tool that automates the manual work it takes to maintain your infrastructure. Use Bolt to automate tasks that you perform on an as-needed basis or as part of a greater orchestration workflow. For example, you can use Bolt to patch and update systems, troubleshoot servers, deploy applications, or stop and restart services. Bolt can be installed on your local workstation and connects directly to remote targets with SSH or WinRM, so you are not required to install any agent software.
 
@@ -17,7 +17,7 @@ No Support and No Warranty are provided by SMA Technologies for this project and
 SMA Technologies assumes no liability for damage caused by the usage of any of the files offered here via this Github repository.
 
 # Prerequisites
-Requires Bolt version 2.x or greater. 
+Requires Bolt version 2.x or greater : https://puppet.com/open-source/bolt/.
 
 The Bolt software should be installed on either a Windows or Linux server with the appropriate OpCon Agent.
 
